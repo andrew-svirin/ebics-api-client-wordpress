@@ -1,0 +1,13 @@
+{
+    "name": "ebics-api/ebics-api-wordpress-plugin",
+    "description": "EBICS API client for WordPress",
+    "type": "wordpress-plugin",
+    "require": {
+        "ebics-api/ebics-api-client-php": "^1"
+    },
+    "authors": [
+        {
+            "name": "Andrii Svirin"
+        }
+    ]
+}
