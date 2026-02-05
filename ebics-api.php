@@ -167,7 +167,8 @@ function ebics_api_api_key_callback() {
  * Renders the settings page with tabs.
  */
 function ebics_api_settings_page() {
-    $active_tab = $_GET['tab'] ?? 'settings';
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    $active_tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'settings';
     ?>
     <div class="wrap">
         <h1><?php esc_html_e( 'EBICS API', 'ebics-api' ); ?></h1>
@@ -255,6 +256,7 @@ function ebics_api_render_connections_tab() {
         </table>
         <?php
     } catch ( \Exception $e ) {
+        /* translators: %s: Error message */
         echo '<div class="notice notice-error"><p>' . sprintf( esc_html__( 'Unexpected error: %s', 'ebics-api' ), esc_html( $e->getMessage() ) ) . '</p></div>';
     }
 }
@@ -275,9 +277,10 @@ function ebics_api_render_logs_tab() {
 
     try {
         $client = Ebics_API_Client_Service::get_client();
-        
+
         $limit = 10;
-        $current_page = $_GET['paged'] ?? 1;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $current_page = isset( $_GET['paged'] ) ? absint( wp_unslash( $_GET['paged'] ) ) : 1;
         $current_page = max( 1, intval( $current_page ) );
 
         $logs_response = $client->accessLogList( [
@@ -286,7 +289,7 @@ function ebics_api_render_logs_tab() {
         ] );
 
         $logs = $logs_response->body;
-        
+
         $x_total = $logs_response->headers['x-total'] ?? 0;
         $total_items = is_array( $x_total ) ? (int) ( $x_total[0] ?? 0 ) : (int) $x_total;
         $total_pages = ceil( $total_items / $limit );
@@ -322,19 +325,20 @@ function ebics_api_render_logs_tab() {
         <div class="tablenav bottom">
             <div class="tablenav-pages">
                 <?php
-                echo paginate_links( [
+                echo wp_kses_post( paginate_links( [
                     'base' => add_query_arg( 'paged', '%#%' ),
                     'format' => '',
                     'prev_text' => __( '&laquo;', 'ebics-api' ),
                     'next_text' => __( '&raquo;', 'ebics-api' ),
                     'total' => $total_pages,
                     'current' => $current_page,
-                ] );
+                ] ) );
                 ?>
             </div>
         </div>
         <?php
     } catch ( \Exception $e ) {
+        /* translators: %s: Error message */
         echo '<div class="notice notice-error"><p>' . sprintf( esc_html__( 'Unexpected error: %s', 'ebics-api' ), esc_html( $e->getMessage() ) ) . '</p></div>';
     }
 }

@@ -14,7 +14,13 @@ class Ebics_API_Transaction_Page {
     }
 
     public function enqueue_scripts( $hook ) {
-        if ( isset( $_GET['page'] ) && $_GET['page'] === 'ebics-api' && isset( $_GET['tab'] ) && $_GET['tab'] === 'transaction' ) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+
+        if ( 'ebics-api' === $page && 'transaction' === $tab ) {
             wp_enqueue_script( 'ebics-api-transaction', plugin_dir_url( __DIR__ ) . 'assets/js/transaction.js', [ 'jquery' ], '1.0.0', true );
             wp_localize_script( 'ebics-api-transaction', 'ebics_api_ajax', [
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -77,7 +83,7 @@ class Ebics_API_Transaction_Page {
     public function ajax_load_order_types() {
         check_ajax_referer( 'ebics_api_transaction_nonce', 'nonce' );
 
-        $connection_id = sanitize_text_field( $_POST['connection_id'] );
+        $connection_id = sanitize_text_field( wp_unslash( $_POST['connection_id'] ?? '' ) );
         if ( empty( $connection_id ) ) {
             wp_send_json_error( __( 'Missing connection ID', 'ebics-api' ) );
         }
@@ -85,7 +91,7 @@ class Ebics_API_Transaction_Page {
         try {
             $client = Ebics_API_Client_Service::get_client();
             $order_types = $client->keyringOrderTypes( [ 'connection_id' => $connection_id ] );
-            
+
             $options = [];
             foreach ( $order_types as $order_type ) {
                 $key = $this->build_order_type_key( $order_type );
@@ -94,7 +100,7 @@ class Ebics_API_Transaction_Page {
                     'label' => $order_type['name'] . ' - ' . $order_type['description'],
                 ];
             }
-            
+
             wp_send_json_success( $options );
 
         } catch ( \Exception $e ) {
@@ -105,9 +111,9 @@ class Ebics_API_Transaction_Page {
     public function ajax_load_transaction_fields() {
         check_ajax_referer( 'ebics_api_transaction_nonce', 'nonce' );
 
-        $order_type_key = sanitize_text_field( $_POST['order_type'] );
+        $order_type_key = sanitize_text_field( wp_unslash( $_POST['order_type'] ?? '' ) );
         $details = $this->parse_order_type_key( $order_type_key );
-        
+
         $html = '';
 
         if ( $details['op_type'] === 'UPLOAD' ) {
@@ -117,8 +123,8 @@ class Ebics_API_Transaction_Page {
             $html .= '</table>';
         } elseif ( $details['op_type'] === 'DOWNLOAD' ) {
             $html .= '<table class="form-table">';
-            $html .= '<tr><th scope="row"><label for="start_date">' . esc_html__( 'Start date', 'ebics-api' ) . '</label></th><td><input type="date" name="start_date" id="start_date" value="' . date( 'Y-m-01' ) . '" required></td></tr>';
-            $html .= '<tr><th scope="row"><label for="end_date">' . esc_html__( 'End date', 'ebics-api' ) . '</label></th><td><input type="date" name="end_date" id="end_date" value="' . date( 'Y-m-d' ) . '" required></td></tr>';
+            $html .= '<tr><th scope="row"><label for="start_date">' . esc_html__( 'Start date', 'ebics-api' ) . '</label></th><td><input type="date" name="start_date" id="start_date" value="' . gmdate( 'Y-m-01' ) . '" required></td></tr>';
+            $html .= '<tr><th scope="row"><label for="end_date">' . esc_html__( 'End date', 'ebics-api' ) . '</label></th><td><input type="date" name="end_date" id="end_date" value="' . gmdate( 'Y-m-d' ) . '" required></td></tr>';
             $html .= '</table>';
         }
 
@@ -128,17 +134,17 @@ class Ebics_API_Transaction_Page {
     public function ajax_submit_transaction() {
         check_ajax_referer( 'ebics_api_transaction_nonce', 'nonce' );
 
-        $connection_id = sanitize_text_field( $_POST['connection_id'] );
-        $order_type_key = sanitize_text_field( $_POST['order_type'] );
+        $connection_id = sanitize_text_field( wp_unslash( $_POST['connection_id'] ?? '' ) );
+        $order_type_key = sanitize_text_field( wp_unslash( $_POST['order_type'] ?? '' ) );
         $details = $this->parse_order_type_key( $order_type_key );
-        
+
         try {
             $client = Ebics_API_Client_Service::get_client();
             $message = '';
 
             if ( $details['op_type'] === 'DOWNLOAD' ) {
-                $start_date = sanitize_text_field( $_POST['start_date'] );
-                $end_date = sanitize_text_field( $_POST['end_date'] );
+                $start_date = sanitize_text_field( wp_unslash( $_POST['start_date'] ?? '' ) );
+                $end_date = sanitize_text_field( wp_unslash( $_POST['end_date'] ?? '' ) );
 
                 if ( $details['name'] === 'BTD' ) {
                     $result = $client->orderTypeBtd( array_filter( [
@@ -162,6 +168,7 @@ class Ebics_API_Transaction_Page {
                     ] );
                     $message = $result['xml'];
                 } else {
+                    /* translators: %s: Order type name */
                     throw new \Exception( sprintf( __( 'Order type %s not supported for DOWNLOAD.', 'ebics-api' ), $details['name'] ) );
                 }
 
@@ -176,6 +183,7 @@ class Ebics_API_Transaction_Page {
                     $result = $client->orderTypeHtd( [ 'connection_id' => $connection_id ] );
                     $message = $result['xml'];
                 } else {
+                    /* translators: %s: Order type name */
                     throw new \Exception( sprintf( __( 'Order type %s not supported for INFO.', 'ebics-api' ), $details['name'] ) );
                 }
 
@@ -184,8 +192,18 @@ class Ebics_API_Transaction_Page {
                     throw new \Exception( __( 'No file uploaded.', 'ebics-api' ) );
                 }
 
-                $file = $_FILES['file_upload'];
-                $file_data = fopen( $file['tmp_name'], 'r' );
+                // Validate uploaded file
+                $file_name = !empty($_FILES['file_upload']['tmp_name']) ? sanitize_text_field( wp_unslash( $_FILES['file_upload']['tmp_name'] ) ) : null;
+                if ( empty( $file_name ) || ! is_uploaded_file( $file_name ) ) {
+                    throw new \Exception( __( 'Invalid uploaded file.', 'ebics-api' ) );
+                }
+
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+                $file_data = fopen( $file_name, 'r' );
+                if ( false === $file_data ) {
+                    throw new \Exception( __( 'Failed to read uploaded file.', 'ebics-api' ) );
+                }
+
                 $es_flag = isset( $_POST['es_flag'] ) ? 1 : 0;
 
                 if ( $details['name'] === 'BTU' ) {
@@ -199,17 +217,21 @@ class Ebics_API_Transaction_Page {
                         'file_data' => $file_data,
                         'with_es' => $es_flag,
                     ] ) );
-                    $message = __( 'File Transaction: ', 'ebics-api' ) . $result['txt'];
+                    /* translators: %s: Transaction result */
+                    $message = sprintf( __( 'File Transaction: %s', 'ebics-api' ), $result['txt'] );
                 } else {
+                    /* translators: %s: Order type name */
                     throw new \Exception( sprintf( __( 'Order type %s not supported for UPLOAD.', 'ebics-api' ), $details['name'] ) );
                 }
             } else {
-                 $message = sprintf( __( 'Connection: %s, Order type: %s', 'ebics-api' ), $connection_id, $order_type_key );
+                 /* translators: 1: Connection ID, 2: Order type key */
+                 $message = sprintf( __( 'Connection: %1$s, Order type: %2$s', 'ebics-api' ), $connection_id, $order_type_key );
             }
 
             wp_send_json_success( '<pre><code>' . htmlspecialchars( $message ) . '</code></pre>' );
 
         } catch ( \Exception $e ) {
+            /* translators: %s: Error message */
             wp_send_json_error( '<pre><code>' . sprintf( __( 'Response: %s', 'ebics-api' ), htmlspecialchars( $e->getMessage() ) ) . '</code></pre>' );
         }
     }
