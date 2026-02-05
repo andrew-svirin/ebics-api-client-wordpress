@@ -1,5 +1,5 @@
 === EBICS API ===
-Contributors: andrii_svirin
+Contributors: asvirin
 Tags: ebics, banking, api, finance
 Requires at least: 5.2
 Tested up to: 6.4
@@ -22,6 +22,12 @@ The EBICS API plugin allows WordPress sites to communicate with banks using the 
 *   **Secure:** Uses WordPress nonces and capability checks.
 
 **Note:** This plugin requires an external EBICS API microservice to function. You must configure the API Host and API Key in the settings.
+
+**Useful Links:**
+
+*   [EBICS API Client homepage](https://sites.google.com/view/ebics-api-client)
+*   [Demo EBICS API Client instance](https://tinyurl.com/safe-ebics)
+*   [Video guide for setting up EBICS API Client instance](https://youtu.be/S14Qkt5m0NI)
 
 == Installation ==
 
