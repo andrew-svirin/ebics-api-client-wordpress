@@ -28,7 +28,7 @@ The EBICS API plugin allows WordPress sites to communicate with banks using the 
 *   [EBICS API Client homepage](https://sites.google.com/view/ebics-api-client)
 *   [Demo EBICS API Client instance](https://tinyurl.com/safe-ebics)
 *   [Video guide for setting up EBICS API Client instance](https://youtu.be/S14Qkt5m0NI)
-*   [GitHub Repository](https://github.com/andrew-svirin/ebics-api-client-wordpress)
+*   [GitHub Repository](https://github.com/ebics-api/ebics-api-client-wordpress)
 
 == Installation ==
 
