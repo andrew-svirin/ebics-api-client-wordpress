@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       EBICS API
- * Description:       Provides a Drupal-friendly interface to an EBICS API microservice for secure bank communication.
+ * Description:       Provides a Wordpress-friendly interface to an EBICS API microservice for secure bank communication.
  * Version:           1.0.0
  * Author:            Andrii Svirin
  * License:           GPL-2.0+
