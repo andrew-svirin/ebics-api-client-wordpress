@@ -1,0 +1,55 @@
+{
+    "packages": [
+        {
+            "name": "ebics-api/ebics-api-client-php",
+            "version": "1.0.3",
+            "version_normalized": "1.0.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ebics-api/ebics-api-client-php.git",
+                "reference": "0a44a64f036f77094cd7b23730a287bac463b8c4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ebics-api/ebics-api-client-php/zipball/0a44a64f036f77094cd7b23730a287bac463b8c4",
+                "reference": "0a44a64f036f77094cd7b23730a287bac463b8c4",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": "^8"
+            },
+            "time": "2026-02-03T12:24:30+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "EbicsApi\\Client\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andrew Svirin"
+                }
+            ],
+            "description": "PHP module to use EBICS API $client->",
+            "keywords": [
+                "api",
+                "client",
+                "ebics",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/ebics-api/ebics-api-client-php/issues",
+                "source": "https://github.com/ebics-api/ebics-api-client-php/tree/1.0.3"
+            },
+            "install-path": "../ebics-api/ebics-api-client-php"
+        }
+    ],
+    "dev": true,
+    "dev-package-names": []
+}
